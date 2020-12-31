@@ -13,58 +13,58 @@ class AudioGramShapeRenderer {
     private var universe = SVGUniverse()
     private var shapeCount = 0
 
-    fun drawBasicShape(shape: Shape, g2d: Graphics2D) {
+    fun drawBasicShape(audiogramShape: AudiogramShape, g2d: Graphics2D) {
 
-        if (shape.shapeType != AudioGramShapeType.SVG) {
-            when (shape.shapeType) {
+        if (audiogramShape.shapeType != AudioGramShapeType.SVG) {
+            when (audiogramShape.shapeType) {
                 AudioGramShapeType.BOX -> {
-                    var box = Rectangle(shape.posX!!, shape.posY!!, shape.width!!, shape.height!!)
-                    if (shape.outline!!) {
-                        g2d.color = Color.decode(shape.outlineColor)
-                        g2d.stroke = BasicStroke(shape.outlineWidth!!.toFloat())
+                    var box = Rectangle(audiogramShape.posX!!, audiogramShape.posY!!, audiogramShape.width!!, audiogramShape.height!!)
+                    if (audiogramShape.outline!!) {
+                        g2d.color = Color.decode(audiogramShape.outlineColor)
+                        g2d.stroke = BasicStroke(audiogramShape.outlineWidth!!.toFloat())
                         g2d.draw(box)
 
 
-                        val color = Color.decode(shape.fill)
-                        g2d.color = Color(color.red, color.green, color.blue, (255 * (shape.opacity!! / 100.0)).toInt())
+                        val color = Color.decode(audiogramShape.fill)
+                        g2d.color = Color(color.red, color.green, color.blue, (255 * (audiogramShape.opacity!! / 100.0)).toInt())
                         g2d.fill(box)
                         g2d.stroke = BasicStroke(0f)
                         shapeCount++
                     } else {
-                        val color = Color.decode(shape.fill)
-                        g2d.color = Color(color.red, color.green, color.blue, (255 * (shape.opacity!! / 100.0)).toInt())
+                        val color = Color.decode(audiogramShape.fill)
+                        g2d.color = Color(color.red, color.green, color.blue, (255 * (audiogramShape.opacity!! / 100.0)).toInt())
                         g2d.fill(box)
                         shapeCount++
                     }
                 }
                 AudioGramShapeType.CIRCLE -> {
-                    val ellipse = Ellipse2D.Double(shape.posX!!.toDouble(), shape.posY!!.toDouble(), shape.width!!.toDouble(), shape.height!!.toDouble())
-                    if (shape.outline!!) {
-                        g2d.color = Color.decode(shape.outlineColor)
-                        g2d.stroke = BasicStroke(shape.outlineWidth!!.toFloat())
+                    val ellipse = Ellipse2D.Double(audiogramShape.posX!!.toDouble(), audiogramShape.posY!!.toDouble(), audiogramShape.width!!.toDouble(), audiogramShape.height!!.toDouble())
+                    if (audiogramShape.outline!!) {
+                        g2d.color = Color.decode(audiogramShape.outlineColor)
+                        g2d.stroke = BasicStroke(audiogramShape.outlineWidth!!.toFloat())
                         g2d.draw(ellipse)
-                        val color = Color.decode(shape.fill)
-                        g2d.color = Color(color.red, color.green, color.blue, (255 * (shape.opacity!! / 100.0)).toInt())
+                        val color = Color.decode(audiogramShape.fill)
+                        g2d.color = Color(color.red, color.green, color.blue, (255 * (audiogramShape.opacity!! / 100.0)).toInt())
                         g2d.fill(ellipse)
                         g2d.stroke = BasicStroke(0f)
                         shapeCount++
                     } else {
-                        val color = Color.decode(shape.fill)
-                        g2d.color = Color(color.red, color.green, color.blue, (255 * (shape.opacity!! / 100.0)).toInt())
+                        val color = Color.decode(audiogramShape.fill)
+                        g2d.color = Color(color.red, color.green, color.blue, (255 * (audiogramShape.opacity!! / 100.0)).toInt())
                         g2d.fill(ellipse)
                         shapeCount++
                     }
                 }
                 AudioGramShapeType.LINE -> {
-                    val x1 = shape.posX!!.toDouble()
-                    val x2 = shape.posX!!.toDouble() + shape.width!!.toDouble()
-                    val y1 = shape.posY!!.toDouble()
-                    val y2 = shape.posY!!.toDouble()
+                    val x1 = audiogramShape.posX!!.toDouble()
+                    val x2 = audiogramShape.posX!!.toDouble() + audiogramShape.width!!.toDouble()
+                    val y1 = audiogramShape.posY!!.toDouble()
+                    val y2 = audiogramShape.posY!!.toDouble()
 
                     val line = Line2D.Double(x1, y1, x2, y2)
-                    val color = Color.decode(shape.fill)
-                    g2d.color = Color(color.red, color.green, color.blue, (255 * (shape.opacity!! / 100.0)).toInt())
-                    g2d.stroke = BasicStroke(shape.outlineWidth!!.toFloat())
+                    val color = Color.decode(audiogramShape.fill)
+                    g2d.color = Color(color.red, color.green, color.blue, (255 * (audiogramShape.opacity!! / 100.0)).toInt())
+                    g2d.stroke = BasicStroke(audiogramShape.outlineWidth!!.toFloat())
                     g2d.draw(line)
                     g2d.stroke = BasicStroke(0f)
                     shapeCount++
@@ -76,16 +76,17 @@ class AudioGramShapeRenderer {
     }
 
 
-    fun drawVectorShape(shape: Shape, g2d: Graphics2D) {
-        val diagram = universe.getDiagram(universe.loadSVG(shape.svg!!.byteInputStream(StandardCharsets.UTF_8), "shape_${++shapeCount}"))
+    fun drawVectorShape(audiogramShape: AudiogramShape, g2d: Graphics2D) {
 
+        val diagram = universe.getDiagram(universe.loadSVG(audiogramShape.svg!!.byteInputStream(StandardCharsets.UTF_8), "shape_${++shapeCount}"))
         val svgBuffer = BufferedImage(diagram.width.toInt(), diagram.height.toInt(), BufferedImage.TYPE_INT_ARGB)
+
         var g2dSvgBuffer = svgBuffer.createGraphics()
         AudioGramRenderer.applyQualityRenderingHints(g2dSvgBuffer)
-        g2dSvgBuffer.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (shape.opacity!! / 100f))
+        g2dSvgBuffer.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (audiogramShape.opacity!! / 100f))
 
         diagram.render(g2dSvgBuffer)
-        g2d.drawImage(svgBuffer, null, shape.posX!!, shape.posY!!)
+        g2d.drawImage(svgBuffer, null, audiogramShape.posX!!, audiogramShape.posY!!)
     }
 
     override fun toString(): String {

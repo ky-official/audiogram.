@@ -41,7 +41,7 @@ class MainController {
     @GetMapping("/progress/{id}")
     @CrossOrigin
     fun progressController(@PathVariable id: String): Mono<Int> {
-        return AudioGramDBManager.getProgress(id)
+        return Mono.just(30)//AudioGramDBManager.getProgress(id)
     }
 
     @GetMapping("/status/{id}")

@@ -2,12 +2,33 @@ package com.audiogram.videogenerator
 
 import com.audiogram.videogenerator.utility.TextAlignment
 
-class LemonMeta {
+class AudiogramMeta {
     lateinit var video: Video
     lateinit var tracker: AudioTracker
 }
 
-class Shape {
+class AudiogramRenderModel {
+    var images: Array<AudiogramImage>? = null
+    var texts: Array<AudiogramText>? = null
+    var shapes: Array<AudiogramShape>? = null
+    var waveforms: Array<AudiogramWaveform>? = null
+    var effects: Array<AudiogramEffect>? = null
+    var background: Array<AudiogramBackground>? = null
+    var meta: Array<AudiogramMeta>? = null
+}
+
+class AudiogramBackground {
+    var type: AudiogramBackgroundType? = null
+    var posX: Int? = null
+    var posY: Int? = null
+    var width: Int? = null
+    var height: Int? = null
+    var url: String? = null
+}
+
+class AudiogramShape : Layer {
+    var animated: Boolean? = null
+    var animationModel: String? = null
     var shapeType: AudioGramShapeType? = null
     var posX: Int? = null
     var posY: Int? = null
@@ -18,11 +39,13 @@ class Shape {
     var outline: Boolean? = false
     var outlineWidth: Int? = null
     var outlineColor: String? = null
-    var zIndex: Int? = null
+    override var zIndex: Int? = null
     var opacity: Int? = null
 }
 
-class LemonImage {
+class AudiogramImage : Layer {
+    var animated: Boolean? = null
+    var animationModel: String? = null
     var url: String? = null
     var frame: AudioGramFrameType? = null
     var frameColor: String? = null
@@ -32,7 +55,7 @@ class LemonImage {
     var transform: String? = null
     var posX: Double? = null
     var posY: Double? = null
-    var zIndex: Int? = null
+    override var zIndex: Int? = null
     var align: AudioGramImageAlign? = null
     var imageEffect: AudioGramImageEffect? = null
     var filter: AudioGramFilterType? = null
@@ -40,7 +63,9 @@ class LemonImage {
     var opacity: Int? = null
 }
 
-class LemonText {
+class AudiogramText : Layer {
+    var animated: Boolean? = null
+    var animationModel: String? = null
     var value: String? = null
     var font: String? = null
     var fontSize: Int? = null
@@ -49,14 +74,14 @@ class LemonText {
     var color: String? = null
     var posX: Int? = null
     var posY: Int? = null
-    var zIndex: Int? = null
+    override var zIndex: Int? = null
     var align: TextAlignment? = null
     var width: Int? = null
-    var spacing: AudioGramSpacing? = null
+    var spacing: Double? = null
     var opacity: Int? = null
 }
 
-class Effect {
+class AudiogramEffect {
     var effectType: AudioGramEffectType? = null
     var effectMode: AudioGramEffectMode? = null
     var posX: Int? = null
@@ -73,7 +98,7 @@ class Video {
     var height: Double? = null
 }
 
-class Waveform {
+class AudiogramWaveform {
     var type: AudioGramWaveformType? = null
     var design: AudioGramWaveformDesign? = null
     var fillMode: FillMode? = null
@@ -91,6 +116,26 @@ class Waveform {
     var opacity: Int? = null
 }
 
+class AnimationModel {
+    var id: String? = null
+    var posX: AnimationParameter? = null
+    var posY: AnimationParameter? = null
+    var scale: AnimationParameter? = null
+    var opacity: AnimationParameter? = null
+    var rotation: AnimationParameter? = null
+    var fill: AnimationParameter? = null
+}
+
+class AnimationParameter {
+    var start: String? = null
+    var end: String? = null
+    var duration: Double? = null
+    var delay: Double? = null
+    var direction: AnimationDirection? = null
+    var interpolation: AnimationInterpolation? = null
+    var delta: Double? = null
+}
+
 class AudioTracker {
     var display: Boolean? = null
     var type: AudioGramAudioTrackerType? = null
@@ -106,5 +151,8 @@ class Point(x: Double, y: Double) {
     val y = y
 }
 
+interface Layer {
+    var zIndex: Int?
 
+}
 

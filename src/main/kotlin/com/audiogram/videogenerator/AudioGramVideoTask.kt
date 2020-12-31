@@ -25,13 +25,13 @@ class AudioGramVideoTask(private var data: AudioGramData) {
     private val maxValue = 1.0f / java.lang.Short.MAX_VALUE
     private val size = 1024
     private val sampleRate = 44100f
-
     private val fft = FFT(size, sampleRate)
 
     private val monoSamples: FloatArray = FloatArray(size)
     private var freqAmpData: ArrayList<FloatArray> = ArrayList()
     private var sigAmpData: ArrayList<FloatArray> = ArrayList()
     private var smooth = FloatArray(6) { _ -> 1f }
+
 
     init {
 
@@ -49,7 +49,7 @@ class AudioGramVideoTask(private var data: AudioGramData) {
         println("audio source decoded")
     }
 
-    fun render() {
+    suspend fun render() {
         AudioGramRenderer(freqAmpData, sigAmpData, data, writer).start()
     }
 

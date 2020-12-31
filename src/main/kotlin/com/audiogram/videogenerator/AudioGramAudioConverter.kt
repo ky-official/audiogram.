@@ -47,20 +47,16 @@ sealed class AudioGramAudioConverter {
         private fun mp3Convert(source: File, target: File): String {
 
             val listener = object : EncoderProgressListener {
-                override fun message(p0: String?) {
-                }
 
-                override fun sourceInfo(p0: MultimediaInfo?) {
-                }
-
-                override fun progress(p0: Int) {
-                }
+                override fun message(p0: String?) {}
+                override fun sourceInfo(p0: MultimediaInfo?) {}
+                override fun progress(p0: Int) {}
 
             }
 
             val audio = AudioAttributes()
             audio.setCodec("libmp3lame")
-            audio.setBitRate(128000)
+            audio.setBitRate(256000)
             audio.setChannels(2)
             audio.setSamplingRate(44100)
             val attrs = EncodingAttributes()

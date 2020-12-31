@@ -29,10 +29,10 @@ class AudioGramPlotter {
         return plotters
     }
 
-    internal class SigAmpPlotterSpectrogram(waveform: Waveform, data: AudioGramData) : Plotter {
+    internal class SigAmpPlotterSpectrogram(waveform: AudiogramWaveform, data: AudioGramData) : Plotter {
 
         override var data: AudioGramData = data
-        override var waveform: Waveform = waveform
+        override var waveform: AudiogramWaveform = waveform
 
         override fun plot(ampData: ArrayList<FloatArray>, currentPoint: Int, g2d: Graphics2D) {
             val path = GeneralPath(Path2D.WIND_NON_ZERO, 5)
@@ -123,10 +123,10 @@ class AudioGramPlotter {
 
     }
 
-    internal class SigAmpPlotterRainBars(waveform: Waveform, data: AudioGramData) : Plotter {
+    internal class SigAmpPlotterRainBars(waveform: AudiogramWaveform, data: AudioGramData) : Plotter {
 
         override var data: AudioGramData = data
-        override var waveform: Waveform = waveform
+        override var waveform: AudiogramWaveform = waveform
 
         override fun plot(ampData: ArrayList<FloatArray>, currentPoint: Int, g2d: Graphics2D) {
             val span = waveform.width!!
@@ -217,10 +217,10 @@ class AudioGramPlotter {
 
     }
 
-    internal class SigAmpPlotterArcReactor(waveform: Waveform, data: AudioGramData) : Plotter {
+    internal class SigAmpPlotterArcReactor(waveform: AudiogramWaveform, data: AudioGramData) : Plotter {
 
         override var data: AudioGramData = data
-        override var waveform: Waveform = waveform
+        override var waveform: AudiogramWaveform = waveform
 
         override fun plot(ampData: ArrayList<FloatArray>, currentPoint: Int, g2d: Graphics2D) {
 
@@ -331,10 +331,10 @@ class AudioGramPlotter {
 
     }
 
-    internal class FreqAmpPlotterPelicanGrid(waveform: Waveform, data: AudioGramData) : Plotter {
+    internal class FreqAmpPlotterPelicanGrid(waveform: AudiogramWaveform, data: AudioGramData) : Plotter {
 
         override var data: AudioGramData = data
-        override var waveform: Waveform = waveform
+        override var waveform: AudiogramWaveform = waveform
 
         override fun plot(ampData: ArrayList<FloatArray>, currentPoint: Int, g2d: Graphics2D) {
 
@@ -466,10 +466,10 @@ class AudioGramPlotter {
 
     }
 
-    internal class FreqAmpPlotterMorphStack(waveform: Waveform, data: AudioGramData) : Plotter {
+    internal class FreqAmpPlotterMorphStack(waveform: AudiogramWaveform, data: AudioGramData) : Plotter {
 
         override var data: AudioGramData = data
-        override var waveform: Waveform = waveform
+        override var waveform: AudiogramWaveform = waveform
 
         override fun plot(ampData: ArrayList<FloatArray>, currentPoint: Int, g2d: Graphics2D) {
 
@@ -520,10 +520,10 @@ class AudioGramPlotter {
 
     }
 
-    internal class FreqAmpPlotterSpectralFlux(waveform: Waveform, data: AudioGramData) : Plotter {
+    internal class FreqAmpPlotterSpectralFlux(waveform: AudiogramWaveform, data: AudioGramData) : Plotter {
 
         override var data: AudioGramData = data
-        override var waveform: Waveform = waveform
+        override var waveform: AudiogramWaveform = waveform
 
         override fun plot(ampData: ArrayList<FloatArray>, currentPoint: Int, g2d: Graphics2D) {
 
@@ -605,7 +605,7 @@ class AudioGramPlotter {
 
     interface Plotter {
         var data: AudioGramData
-        var waveform: Waveform
+        var waveform: AudiogramWaveform
         fun plot(ampData: java.util.ArrayList<FloatArray>, currentPoint: Int, g2d: Graphics2D)
     }
 

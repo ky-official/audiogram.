@@ -34,7 +34,7 @@ class EffectsManager(data: AudioGramData) {
     }
 }
 
-private class ParticleEffect(var data: Effect) : CanRender {
+private class ParticleEffect(var data: AudiogramEffect) : CanRender {
 
     var particles = ArrayList<Particle>()
 
@@ -84,7 +84,7 @@ private class ParticleEffect(var data: Effect) : CanRender {
         }
     }
 
-    private inner class Particle(data: Effect) {
+    private inner class Particle(data: AudiogramEffect) {
 
         var dx = 0
         var dy = Math.random() * 4 + 1

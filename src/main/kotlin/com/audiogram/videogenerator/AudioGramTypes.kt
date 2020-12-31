@@ -64,6 +64,17 @@ enum class FillMode {
     MONO, GRADIENT_MID, GRADIENT_LR, GRADIENT_RL, TRIAD
 }
 
+enum class AnimationDirection {
+    FORWARD, REVERSE, CIRCLE
+}
+
+enum class AnimationInterpolation {
+    LINEAR, EASE_IN, EASE_OUT
+}
+
+enum class AudiogramBackgroundType {
+    GIF, VIDEO
+}
 /*
 fun main(args:Array<String>){
     AudioGramDBManager.connect()

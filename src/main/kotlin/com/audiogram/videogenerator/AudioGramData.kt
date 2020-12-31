@@ -17,17 +17,17 @@ class AudioGramData {
         private set
     var videoUrl: String? = null
         private set
-    lateinit var meta: LemonMeta
+    lateinit var meta: AudiogramMeta
         private set
-    var images: ArrayList<LemonImage> = ArrayList()
+    var staticLayers: ArrayList<Layer> = ArrayList()
         private set
-    var shapes: ArrayList<Shape> = ArrayList()
+    var animatedLayers: ArrayList<Layer> = ArrayList()
         private set
-    var texts: ArrayList<LemonText> = ArrayList()
+    var waveforms: ArrayList<AudiogramWaveform> = ArrayList()
         private set
-    var waveforms: ArrayList<Waveform> = ArrayList()
+    var effects: ArrayList<AudiogramEffect> = ArrayList()
         private set
-    var effects: ArrayList<Effect> = ArrayList()
+    var animations: LinkedHashMap<String, AnimationModel> = LinkedHashMap()
         private set
     var trackLength: Double? = null
 
@@ -54,34 +54,55 @@ class AudioGramData {
             if (it.contentType != null && (it.contentType.substringBefore("/") == "image" || it.name.substringBefore("_") == "image")) {
                 val string = it.getHeader("content-disposition")
                 val json = UriUtils.decode(string.substring(string.indexOf("{"), string.indexOf("}") + 1), "UTF-8")
-                val image = Gson().fromJson(json, LemonImage().javaClass)
+                val image = Gson().fromJson(json, AudiogramImage().javaClass)
                 image.url = AudioGramFileManager.saveResource("image", this.id, it)
-                this.images.add(image)
+
+                if (image.animated!!) {
+                    this.animatedLayers.add(image)
+                } else {
+                    this.staticLayers.add(image)
+                }
             }
             if (it.name.substringBefore("_") == "shape") {
-                val shape = Gson().fromJson(String(it.inputStream.readBytes()), Shape().javaClass)
-                this.shapes.add(shape)
+                val shape = Gson().fromJson(String(it.inputStream.readBytes()), AudiogramShape().javaClass)
+
+                if (shape.animated!!) {
+                    this.animatedLayers.add(shape)
+                } else {
+                    this.staticLayers.add(shape)
+                }
             }
             if (it.name.substringBefore("_") == "text") {
-                val text = Gson().fromJson(String(it.inputStream.readBytes()), LemonText().javaClass)
-                this.texts.add(text)
-                AudioGramRenderer.loadApplicationFonts()
+                val text = Gson().fromJson(String(it.inputStream.readBytes()), AudiogramText().javaClass)
+
+                if (text.animated!!) {
+                    this.animatedLayers.add(text)
+                } else {
+                    this.staticLayers.add(text)
+                }
+                //  AudioGramRenderer.loadApplicationFonts()
             }
             if (it.name.substringBefore("_") == "effect") {
-                val effect = Gson().fromJson(String(it.inputStream.readBytes()), Effect().javaClass)
+                val effect = Gson().fromJson(String(it.inputStream.readBytes()), AudiogramEffect().javaClass)
                 this.effects.add(effect)
             }
+            if (it.name.substringBefore("_") == "animation") {
+                val animation = Gson().fromJson(String(it.inputStream.readBytes()), AnimationModel().javaClass)
+                this.animations[animation.id!!] = animation
+            }
             if (it.name.substringBefore("_") == "waveform") {
-                val waveform = Gson().fromJson(String(it.inputStream.readBytes()), Waveform().javaClass)
+                val waveform = Gson().fromJson(String(it.inputStream.readBytes()), AudiogramWaveform().javaClass)
                 this.waveforms.add(waveform)
             }
             if (it.name == "meta") {
-                val meta = Gson().fromJson(String(it.inputStream.readBytes()), LemonMeta().javaClass)
+                val meta = Gson().fromJson(String(it.inputStream.readBytes()), AudiogramMeta().javaClass)
                 this.meta = meta
             }
 
         }
-        AudioGramDBManager.addTask(this.id)
+
+        //  AudioGramDBManager.addTask(this.id)
+
     }
 
 }
