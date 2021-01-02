@@ -91,12 +91,14 @@ class AudioGramData {
                     model.waveforms?.let { this.waveforms.addAll(it); this.meta = model.meta!! }
 
 
+                    println("initialization completed")
                     //AudioGramRenderer.loadApplicationFonts()
                 }
             }
             //AudioGramDBManager.addTask(this.id)
         } catch (e: Exception) {
-            throw AudioGramException(e.message!!)
+            e.printStackTrace()
+            throw AudioGramException("Missing files or invalid render model:  ${e.message}")
         }
     }
 

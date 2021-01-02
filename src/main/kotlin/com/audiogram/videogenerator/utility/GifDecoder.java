@@ -95,7 +95,7 @@ public class GifDecoder {
     protected byte[] pixels;
     protected ArrayList frames; // frames read from current file
     protected int frameCount;
-    private int currentFrame = 1;
+    private int currentFrame = 0;
 
     /**
      * Gets display duration for specified frame.
@@ -133,9 +133,9 @@ public class GifDecoder {
     public BufferedImage grabImage() {
 
         BufferedImage image = null;
-        if (currentFrame >= frameCount) {
-            currentFrame = frameCount;
+        if (currentFrame + 1 >= frameCount) {
             image = getFrame(currentFrame);
+            currentFrame = 0;
             return image;
         } else {
             image = getFrame(currentFrame);

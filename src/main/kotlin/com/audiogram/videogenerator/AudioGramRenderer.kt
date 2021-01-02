@@ -8,12 +8,19 @@ import com.jhlabs.image.NoiseFilter
 import com.twelvemonkeys.image.ConvolveWithEdgeOp
 import com.xuggle.mediatool.IMediaWriter
 import org.imgscalr.Scalr
+import org.opencv.core.Core
+import org.opencv.core.CvType
+import org.opencv.core.Mat
+import org.opencv.core.Size
+import org.opencv.highgui.HighGui
+import org.opencv.imgproc.Imgproc
 import java.awt.*
 import java.awt.RenderingHints
 import java.awt.font.TextAttribute
 import java.awt.geom.*
 import java.awt.image.BufferedImage
 import java.awt.image.ColorModel
+import java.awt.image.DataBufferByte
 import java.awt.image.Kernel
 import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
@@ -24,6 +31,9 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
 
     suspend fun start() {
 
+        loadOpenCvLibraries()
+
+        val startTime = System.currentTimeMillis()
         val points = freqAmpData.size
         var index = 1
         var progress = 0
@@ -88,7 +98,7 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
         System.gc()
         // AudioGramDBManager.updateProgress(data.id, 100)
         // AudioGramDBManager.updateStatus(data.id, "FINISHED")
-        println("writer closed")
+        println("Render completed in ${(System.currentTimeMillis() - startTime) / 1000.0} secs")
 
     }
 
@@ -530,6 +540,67 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
 
             g2.drawImage(glowLayer, AffineTransform.getTranslateInstance(deltaX, deltaY), null)
 
+        }
+
+        fun loadOpenCvLibraries() {
+            try {
+                val osName = System.getProperty("os.name")
+                var opencvpath = System.getProperty("user.dir")
+                if (osName.startsWith("Windows")) {
+                    val bitness = System.getProperty("sun.arch.data.model").toInt()
+                    opencvpath = if (bitness == 32) {
+                        "$opencvpath\\opencv\\x86\\"
+                    } else if (bitness == 64) {
+                        "$opencvpath\\opencv\\x64\\"
+                    } else {
+                        "$opencvpath\\opencv\\x86\\"
+                    }
+                } else if (osName == "Mac OS X") {
+                    opencvpath += "Your path to .dylib"
+                }
+                System.load(opencvpath + Core.NATIVE_LIBRARY_NAME + ".dll")
+            } catch (e: Exception) {
+                throw RuntimeException("Failed to load opencv native library", e)
+            }
+        }
+
+        fun fastResizeImage(sourceIn: BufferedImage, width: Double, height: Double): BufferedImage {
+            val source = convertToType(sourceIn, BufferedImage.TYPE_3BYTE_BGR)
+            val scale: Double
+            val scaledWidth: Double
+            val scaledHeight: Double
+
+            if (width >= height) {
+                scale = width / source.width
+                scaledWidth = width
+                scaledHeight = source.height * scale
+            } else {
+                scale = height / source.height
+                scaledHeight = height
+                scaledWidth = source.width * scale
+            }
+            val pixels = (source.raster.dataBuffer as DataBufferByte).data
+            val matImg = Mat(source.height, source.width, CvType.CV_8UC3)
+            matImg.put(0, 0, pixels)
+
+            val resizeImage = Mat()
+            val sz = Size(scaledWidth, scaledHeight)
+
+            Imgproc.resize(matImg, resizeImage, sz)
+            return HighGui.toBufferedImage(resizeImage) as BufferedImage
+        }
+
+        private fun convertToType(sourceImage: BufferedImage, targetType: Int): BufferedImage {
+
+            val image: BufferedImage
+            if (sourceImage.type == targetType) image = sourceImage
+            else {
+                image = BufferedImage(sourceImage.width,
+                        sourceImage.height, targetType)
+                image.graphics.drawImage(sourceImage, 0, 0, null)
+            }
+
+            return image
         }
 
     }

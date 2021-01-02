@@ -492,7 +492,7 @@ class AudioGramPlotter {
 
             var fill = Color.decode(waveform.fill1)
             g2d.color = fill
-            g2d.stroke = BasicStroke(6f)
+            g2d.stroke = BasicStroke(waveform.strokeWidth!!.toFloat() * 2)
             g2d.draw(path1)
             g2d.stroke = BasicStroke(0f)
 

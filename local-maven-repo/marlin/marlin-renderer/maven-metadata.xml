@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+    <groupId>marlin</groupId>
+    <artifactId>marlin-renderer</artifactId>
+    <versioning>
+        <release>0.9.4.3</release>
+        <versions>
+            <version>0.9.4.3</version>
+        </versions>
+        <lastUpdated>20201105124254</lastUpdated>
+    </versioning>
+</metadata>

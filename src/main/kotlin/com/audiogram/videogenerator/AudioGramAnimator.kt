@@ -73,7 +73,11 @@ class AudioGramAnimator(val data: AudioGramData) {
         for (layer in data.animatedLayers) {
             when (layer) {
                 is AudiogramImage -> {
-                    val source = ImageIO.read(AudioGramFileManager.getResource(layer.file))
+                    var source = ImageIO.read(AudioGramFileManager.getResource(layer.file))
+
+                    if (layer.width != 0.0 || layer.height != 0.0) {
+                        source = AudioGramRenderer.fastResizeImage(source, layer.width!!, layer.height!!)
+                    }
                     g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (layer.opacity!! / 100f))
                     g2d.drawImage(source, null, layer.posX!!.toInt(), layer.posY!!.toInt())
                     g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)

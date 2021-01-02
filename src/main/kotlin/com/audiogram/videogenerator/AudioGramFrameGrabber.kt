@@ -3,14 +3,7 @@ package com.audiogram.videogenerator
 import com.audiogram.videogenerator.utility.GifDecoder
 import org.bytedeco.javacv.FFmpegFrameGrabber
 import org.bytedeco.javacv.Java2DFrameUtils
-import org.opencv.core.Core
-import org.opencv.core.CvType
-import org.opencv.core.Mat
-import org.opencv.core.Size
-import org.opencv.highgui.HighGui
-import org.opencv.imgproc.Imgproc
 import java.awt.image.BufferedImage
-import java.awt.image.DataBufferByte
 import java.io.File
 import kotlin.math.roundToInt
 
@@ -59,7 +52,6 @@ class AudioGramFrameGrabber(data: AudioGramData, fpsOut: Int) {
             }
             else -> mode = AudioGramScaleMode.EQUI_SCALING
         }
-        loadLibraries()
     }
 
     private fun findIndexes(n: Int, r: Int): IntArray {
@@ -169,70 +161,10 @@ class AudioGramFrameGrabber(data: AudioGramData, fpsOut: Int) {
 
 
         outputCounter++
-        return resizeImage(outputImage!!, data.background.width!!, data.background.height!!)
+        return AudioGramRenderer.fastResizeImage(outputImage!!, data.background.width!!, data.background.height!!)
         //  return outputImage
     }
 
-    private fun loadLibraries() {
-        try {
-            val osName = System.getProperty("os.name")
-            var opencvpath = System.getProperty("user.dir")
-            if (osName.startsWith("Windows")) {
-                val bitness = System.getProperty("sun.arch.data.model").toInt()
-                opencvpath = if (bitness == 32) {
-                    "$opencvpath\\opencv\\x86\\"
-                } else if (bitness == 64) {
-                    "$opencvpath\\opencv\\x64\\"
-                } else {
-                    "$opencvpath\\opencv\\x86\\"
-                }
-            } else if (osName == "Mac OS X") {
-                opencvpath += "Your path to .dylib"
-            }
-            println(opencvpath)
-            System.load(opencvpath + Core.NATIVE_LIBRARY_NAME + ".dll")
-        } catch (e: Exception) {
-            throw RuntimeException("Failed to load opencv native library", e)
-        }
-    }
 
-    private fun resizeImage(sourceIn: BufferedImage, width: Double, height: Double): BufferedImage {
-        val source = convertToType(sourceIn, BufferedImage.TYPE_3BYTE_BGR)
-        val scale: Double
-        val scaledWidth: Double
-        val scaledHeight: Double
-
-        if (width >= height) {
-            scale = width / source.width
-            scaledWidth = width
-            scaledHeight = source.height * scale
-        } else {
-            scale = height / source.height
-            scaledHeight = height
-            scaledWidth = source.width * scale
-        }
-        val pixels = (source.raster.dataBuffer as DataBufferByte).data
-        val matImg = Mat(source.height, source.width, CvType.CV_8UC3)
-        matImg.put(0, 0, pixels)
-
-        val resizeImage = Mat()
-        val sz = Size(scaledWidth, scaledHeight)
-
-        Imgproc.resize(matImg, resizeImage, sz)
-        return HighGui.toBufferedImage(resizeImage) as BufferedImage
-    }
-
-    private fun convertToType(sourceImage: BufferedImage, targetType: Int): BufferedImage {
-
-        val image: BufferedImage
-        if (sourceImage.type == targetType) image = sourceImage
-        else {
-            image = BufferedImage(sourceImage.width,
-                    sourceImage.height, targetType)
-            image.graphics.drawImage(sourceImage, 0, 0, null)
-        }
-
-        return image
-    }
 
 }

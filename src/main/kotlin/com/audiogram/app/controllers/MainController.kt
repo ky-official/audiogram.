@@ -73,7 +73,10 @@ class MainController {
     @CrossOrigin
     fun postController(): ResponseEntity<Any> {
         try {
-            AudioGramTaskManager.addTask(AudioGramData().also { it.initialize(request!!.parts) })
+
+            val data = AudioGramData()
+            data.initialize(request!!.parts)
+            AudioGramTaskManager.addTask(data)
             println("controller returned")
         } catch (e: AudioGramException) {
             return ResponseEntity("Failed to initialize Render: ${e.message}", HttpStatus.INTERNAL_SERVER_ERROR)

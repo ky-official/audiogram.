@@ -39,7 +39,7 @@ class AudioGramVideoTask(private var data: AudioGramData) {
 
             val quality = data.meta.video.quality
             var bitrate = 5000000
-            if (quality != null && quality <= 10) bitrate *= 1000000
+            if (quality != null && quality <= 10) bitrate = quality * 1000000
 
             writer.addVideoStreamWithBitRate(
                     0,
@@ -62,7 +62,12 @@ class AudioGramVideoTask(private var data: AudioGramData) {
     }
 
     suspend fun render() {
-        AudioGramRenderer(freqAmpData, sigAmpData, data, writer).start()
+        try {
+            AudioGramRenderer(freqAmpData, sigAmpData, data, writer).start()
+        } catch (e: Exception) {
+            println(e.message)
+            //update front end
+        }
     }
 
     private fun decode() {
