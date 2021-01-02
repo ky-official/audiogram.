@@ -18,7 +18,7 @@ class AudioGramShapeRenderer {
         if (audiogramShape.shapeType != AudioGramShapeType.SVG) {
             when (audiogramShape.shapeType) {
                 AudioGramShapeType.BOX -> {
-                    var box = Rectangle(audiogramShape.posX!!, audiogramShape.posY!!, audiogramShape.width!!, audiogramShape.height!!)
+                    var box = Rectangle(audiogramShape.posX!!.toInt(), audiogramShape.posY!!.toInt(), audiogramShape.width!!, audiogramShape.height!!)
                     if (audiogramShape.outline!!) {
                         g2d.color = Color.decode(audiogramShape.outlineColor)
                         g2d.stroke = BasicStroke(audiogramShape.outlineWidth!!.toFloat())
@@ -38,7 +38,7 @@ class AudioGramShapeRenderer {
                     }
                 }
                 AudioGramShapeType.CIRCLE -> {
-                    val ellipse = Ellipse2D.Double(audiogramShape.posX!!.toDouble(), audiogramShape.posY!!.toDouble(), audiogramShape.width!!.toDouble(), audiogramShape.height!!.toDouble())
+                    val ellipse = Ellipse2D.Double(audiogramShape.posX!!, audiogramShape.posY!!, audiogramShape.width!!.toDouble(), audiogramShape.height!!.toDouble())
                     if (audiogramShape.outline!!) {
                         g2d.color = Color.decode(audiogramShape.outlineColor)
                         g2d.stroke = BasicStroke(audiogramShape.outlineWidth!!.toFloat())
@@ -56,10 +56,10 @@ class AudioGramShapeRenderer {
                     }
                 }
                 AudioGramShapeType.LINE -> {
-                    val x1 = audiogramShape.posX!!.toDouble()
-                    val x2 = audiogramShape.posX!!.toDouble() + audiogramShape.width!!.toDouble()
-                    val y1 = audiogramShape.posY!!.toDouble()
-                    val y2 = audiogramShape.posY!!.toDouble()
+                    val x1 = audiogramShape.posX!!
+                    val x2 = x1 + audiogramShape.width!!.toDouble()
+                    val y1 = audiogramShape.posY!!
+                    val y2 = y1
 
                     val line = Line2D.Double(x1, y1, x2, y2)
                     val color = Color.decode(audiogramShape.fill)
@@ -86,7 +86,7 @@ class AudioGramShapeRenderer {
         g2dSvgBuffer.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (audiogramShape.opacity!! / 100f))
 
         diagram.render(g2dSvgBuffer)
-        g2d.drawImage(svgBuffer, null, audiogramShape.posX!!, audiogramShape.posY!!)
+        g2d.drawImage(svgBuffer, null, audiogramShape.posX!!.toInt(), audiogramShape.posY!!.toInt())
     }
 
     override fun toString(): String {

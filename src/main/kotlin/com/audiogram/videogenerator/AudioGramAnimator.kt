@@ -1,20 +1,16 @@
 package com.audiogram.videogenerator
 
+import java.awt.AlphaComposite
 import java.awt.Graphics2D
 import javax.imageio.ImageIO
 
-class AudioGramAnimator(val data: AudioGramData, val fps: Int) {
+class AudioGramAnimator(val data: AudioGramData) {
 
-    var frameCount = 0
-
-    init {
-
-    }
+    private val shapeRenderer = AudioGramShapeRenderer()
 
     fun render(g2d: Graphics2D) {
         tick()
         draw(g2d)
-        frameCount++
     }
 
     private fun tick() {
@@ -24,16 +20,51 @@ class AudioGramAnimator(val data: AudioGramData, val fps: Int) {
 
                     var model = data.animations[layer.animationModel]!!
 
+                    model.posX?.let {
+                        layer.posX = it.interpolate()
+                    }
 
-                    /*val frameRange = (model.posX!!.duration!! * fps) / 1000
+                    model.posY?.let {
+                        layer.posY = it.interpolate()
+                    }
 
-                    var absoluteProgress = frameCount / frameRange
-                    if (frameCount >= frameRange.roundToInt()) absoluteProgress = 1.0
+                    model.opacity?.let {
+                        layer.opacity = it.interpolate().toInt()
+                    }
 
-                    val range = model!!.posX!!.end!!.toDouble() - model!!.posX!!.start!!.toDouble()
-                    layer.posX = model!!.posX!!.start!!.toDouble() + (range * easeIn(absoluteProgress))
-*/
                 }
+                is AudiogramShape -> {
+
+                    var model = data.animations[layer.animationModel]!!
+
+                    model.posX?.let {
+                        layer.posX = it.interpolate()
+                    }
+
+                    model.posY?.let {
+                        layer.posY = it.interpolate()
+                    }
+
+                    model.opacity?.let {
+                        layer.opacity = it.interpolate().toInt()
+                    }
+                }
+                is AudiogramText -> {
+                    var model = data.animations[layer.animationModel]!!
+
+                    model.posX?.let {
+                        layer.posX = it.interpolate()
+                    }
+
+                    model.posY?.let {
+                        layer.posY = it.interpolate()
+                    }
+
+                    model.opacity?.let {
+                        layer.opacity = it.interpolate().toInt()
+                    }
+                }
+
             }
         }
     }
@@ -42,18 +73,21 @@ class AudioGramAnimator(val data: AudioGramData, val fps: Int) {
         for (layer in data.animatedLayers) {
             when (layer) {
                 is AudiogramImage -> {
-                    var source = ImageIO.read(AudioGramFileManager.getResource(layer.url))
-                    if (layer.width != 0.0 || layer.height != 0.0) {
-                        // source = Scalr.resize(source, Scalr.Method.QUALITY, Scalr.Mode.AUTOMATIC, layer.width!!.toInt(), layer.height!!.toInt(), Scalr.OP_ANTIALIAS)
-                    }
+                    val source = ImageIO.read(AudioGramFileManager.getResource(layer.file))
+                    g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (layer.opacity!! / 100f))
                     g2d.drawImage(source, null, layer.posX!!.toInt(), layer.posY!!.toInt())
+                    g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)
+                }
+                is AudiogramShape -> {
+                    if (layer.shapeType != AudioGramShapeType.SVG) shapeRenderer.drawBasicShape(layer, g2d)
+                    else shapeRenderer.drawVectorShape(layer, g2d)
+                }
+                is AudiogramText -> {
+                    AudioGramRenderer.drawText(layer, g2d)
                 }
             }
         }
     }
 
-    private fun easeIn(x: Double): Double {
-        return x * x * x
-    }
 
 }

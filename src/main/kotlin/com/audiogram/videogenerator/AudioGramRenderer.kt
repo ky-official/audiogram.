@@ -39,8 +39,8 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
         val plotters = AudioGramPlotter().getPlotters(data)
         val effectsManager = EffectsManager(data)
 
-        if (data.videoUrl != null) audioGramFrameGrabber = AudioGramFrameGrabber(data, 30)
-        if (data.animatedLayers.isNotEmpty()) audioGramAnimator = AudioGramAnimator(data, 30)
+        if (data.isBackgroundInitialized) audioGramFrameGrabber = AudioGramFrameGrabber(data, 30)
+        if (data.animatedLayers.isNotEmpty()) audioGramAnimator = AudioGramAnimator(data)
 
         while (AudioGramTaskManager.taskIsRunning(data.id)) {
 
@@ -48,10 +48,8 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
             if (currentPoint < points) {
 
 
-
-
                 g2d.clearRect(0, 0, data.meta.video.width!!.toInt(), data.meta.video.height!!.toInt())
-                audioGramFrameGrabber?.let { g2d.drawRenderedImage(it.grabNext(), null) }
+                audioGramFrameGrabber?.let { g2d.drawImage(it.grabNext(), null, data.background.posX!!, data.background.posY!!) }
 
                 g2d.drawRenderedImage(staticImage, null)
                 audioGramAnimator?.let { it.render(g2d) }
@@ -66,13 +64,14 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
                 ////------------ progress logic -----------\\\\
 
                 val trackProgress = (currentPoint / points.toDouble()) * 100
+
                 if (trackProgress.roundToInt() != progress) {
+
                     println("task with id:${data.id} at $progress%")
                     progress = trackProgress.roundToInt()
-                    //AudioGramDBManager.updateProgress(data.id, progress)
+
                 }
                 if (data.meta.tracker.display!!) renderTrackProgress(trackProgress, g2d, data.meta.tracker)
-
 
                 currentPoint++
                 index++
@@ -119,7 +118,7 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
 
             when (layer) {
                 is AudiogramImage -> {
-                    var source = ImageIO.read(AudioGramFileManager.getResource(layer.url))
+                    var source = ImageIO.read(AudioGramFileManager.getResource(layer.file))
                     if (layer.width != 0.0 || layer.height != 0.0) {
                         source = Scalr.resize(source, Scalr.Method.QUALITY, Scalr.Mode.AUTOMATIC, layer.width!!.toInt(), layer.height!!.toInt(), Scalr.OP_ANTIALIAS)
                     }
@@ -198,26 +197,7 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
                     }
                 }
                 is AudiogramText -> {
-                    val attributes = HashMap<TextAttribute, Any>()
-                    attributes[TextAttribute.POSTURE] = if (layer.fontStyle == AudioGramFontStyle.ITALIC) TextAttribute.POSTURE_OBLIQUE else TextAttribute.POSTURE_REGULAR
-                    attributes[TextAttribute.SIZE] = layer.fontSize!!
-                    attributes[TextAttribute.TRACKING] = layer.spacing!!
-
-                    when (layer.fontWeight) {
-                        AudioGramFontWeight.BOLD -> attributes[TextAttribute.WEIGHT] = TextAttribute.WEIGHT_BOLD
-                        AudioGramFontWeight.NORMAL -> attributes[TextAttribute.WEIGHT] = TextAttribute.WEIGHT_REGULAR
-                        AudioGramFontWeight.THIN -> attributes[TextAttribute.WEIGHT] = TextAttribute.WEIGHT_LIGHT
-                    }
-                    var color = Color.decode(layer.color)
-                    TextRenderer.drawString(
-                            g2d,
-                            layer.value,
-                            Font.decode(layer.font!!).deriveFont(attributes),
-                            Color(color.red, color.green, color.blue, (255 * (layer.opacity!! / 100.0)).toInt()),
-                            Rectangle(layer.posX!!, layer.posY!!, layer.width!!, 100),
-                            layer.align,
-                            TextFormat.FIRST_LINE_VISIBLE
-                    )
+                    drawText(layer, g2d)
                 }
                 is AudiogramShape -> {
                     if (layer.shapeType != AudioGramShapeType.SVG)
@@ -374,6 +354,28 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
                   }
               }
           }*/
+        fun drawText(layer: AudiogramText, g2d: Graphics2D) {
+            val attributes = HashMap<TextAttribute, Any>()
+            attributes[TextAttribute.POSTURE] = if (layer.fontStyle == AudioGramFontStyle.ITALIC) TextAttribute.POSTURE_OBLIQUE else TextAttribute.POSTURE_REGULAR
+            attributes[TextAttribute.SIZE] = layer.fontSize!!
+            attributes[TextAttribute.TRACKING] = layer.spacing!!
+
+            when (layer.fontWeight) {
+                AudioGramFontWeight.BOLD -> attributes[TextAttribute.WEIGHT] = TextAttribute.WEIGHT_BOLD
+                AudioGramFontWeight.NORMAL -> attributes[TextAttribute.WEIGHT] = TextAttribute.WEIGHT_REGULAR
+                AudioGramFontWeight.THIN -> attributes[TextAttribute.WEIGHT] = TextAttribute.WEIGHT_LIGHT
+            }
+            var color = Color.decode(layer.color)
+            TextRenderer.drawString(
+                    g2d,
+                    layer.value,
+                    Font.decode(layer.font!!).deriveFont(attributes),
+                    Color(color.red, color.green, color.blue, (255 * (layer.opacity!! / 100.0)).toInt()),
+                    Rectangle(layer.posX!!.toInt(), layer.posY!!.toInt(), layer.width!!, 100),
+                    layer.align,
+                    TextFormat.FIRST_LINE_VISIBLE
+            )
+        }
 
         fun drawCurve(points: java.util.ArrayList<Point>, path: GeneralPath, inBend: Int, outBend: Int) {
 

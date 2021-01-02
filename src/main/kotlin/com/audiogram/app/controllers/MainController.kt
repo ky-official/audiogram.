@@ -12,7 +12,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.util.MimeType
 import org.springframework.web.bind.annotation.*
-import reactor.core.publisher.Mono
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -38,32 +37,14 @@ class MainController {
 
     }
 
-    @GetMapping("/progress/{id}")
-    @CrossOrigin
-    fun progressController(@PathVariable id: String): Mono<Int> {
-        return Mono.just(30)//AudioGramDBManager.getProgress(id)
-    }
-
-    @GetMapping("/status/{id}")
-    @CrossOrigin
-    fun statusController(@PathVariable id: String): String {
-        return AudioGramDBManager.getStatus(id)
-    }
-
-    @GetMapping("/")
-    @CrossOrigin
-    fun testController(): String {
-        return "somethhing"
-    }
-
     @GetMapping("/cancel/{id}")
     @CrossOrigin
-    fun cancelController(@PathVariable id: String): String {
+    fun cancelController(@PathVariable id: String): ResponseEntity<Any> {
 
         CoroutineScope(Dispatchers.IO).launch {
             AudioGramTaskManager.cancelTask(id)
         }
-        return "canceled task with id:$id"
+        return ResponseEntity("canceled task with id:$id", HttpStatus.OK)
     }
 
     @DeleteMapping("/delete/{id}")
@@ -90,16 +71,14 @@ class MainController {
 
     @PostMapping("/generate")
     @CrossOrigin
-    fun postController() {
+    fun postController(): ResponseEntity<Any> {
         try {
-            var data = AudioGramData()
-            data.initialize(request!!.parts)
-            AudioGramTaskManager.addTask(data)
+            AudioGramTaskManager.addTask(AudioGramData().also { it.initialize(request!!.parts) })
             println("controller returned")
         } catch (e: AudioGramException) {
-            println(e.message)
+            return ResponseEntity("Failed to initialize Render: ${e.message}", HttpStatus.INTERNAL_SERVER_ERROR)
         }
-
+        return ResponseEntity("Render task has been successfully initialized", HttpStatus.OK)
     }
 }
 //-Xmx512m -XX:MaxDirectMemorySize=512m

@@ -1,7 +1,7 @@
 package com.audiogram.videogenerator
 
 import com.audiogram.videogenerator.analysis.FFT
-import com.xuggle.mediatool.ToolFactory
+import com.audiogram.videogenerator.utility.MediaWriterMod
 import com.xuggle.xuggler.*
 import kotlin.math.abs
 import kotlin.math.floor
@@ -20,7 +20,7 @@ class AudioGramVideoTask(private var data: AudioGramData) {
     private val frameHeight = data.meta.video.height!!.toInt()
     private var audioUrl: String = data.audioUrl
     private var videoUrl: String = AudioGramFileManager.createVideoContainer(data.id)
-    private var writer = ToolFactory.makeWriter(videoUrl)
+    private var writer = MediaWriterMod(videoUrl)
 
     private val maxValue = 1.0f / java.lang.Short.MAX_VALUE
     private val size = 1024
@@ -34,19 +34,31 @@ class AudioGramVideoTask(private var data: AudioGramData) {
 
 
     init {
+        try {
 
-        writer.addVideoStream(
-                0,
-                0,
-                ICodec.ID.CODEC_ID_H264,
-                IRational.make(30.0),
-                frameWidth,
-                frameHeight
-        )
-        writer.addAudioStream(1, 1, 2, 44100)
 
-        this.decode()
-        println("audio source decoded")
+            val quality = data.meta.video.quality
+            var bitrate = 5000000
+            if (quality != null && quality <= 10) bitrate *= 1000000
+
+            writer.addVideoStreamWithBitRate(
+                    0,
+                    0,
+                    ICodec.ID.CODEC_ID_H264,
+                    IRational.make(30.0),
+                    bitrate,
+                    frameWidth,
+                    frameHeight
+            )
+            writer.addAudioStream(1, 1, 2, 44100)
+
+
+
+            this.decode()
+            println("audio source decoded")
+        } catch (e: Exception) {
+            throw AudioGramException(e.message!!)
+        }
     }
 
     suspend fun render() {

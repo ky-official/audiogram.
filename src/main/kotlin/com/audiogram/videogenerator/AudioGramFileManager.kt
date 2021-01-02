@@ -32,7 +32,7 @@ sealed class AudioGramFileManager {
                 if (resourceDirectory.mkdir()) {
                     val audioDirectory = File("$ROOT/tasks/task_$id/resources/audio")
                     val imagesDirectory = File("$ROOT/tasks/task_$id/resources/images")
-                    val videoDirectory = File("$ROOT/tasks/task_$id/resources/video")
+                    val videoDirectory = File("$ROOT/tasks/task_$id/resources/background")
 
                     audioDirectory.mkdir()
                     imagesDirectory.mkdir()
@@ -104,7 +104,7 @@ sealed class AudioGramFileManager {
                     }
                     "image" -> {
                         val path = "$ROOT/tasks/task_$id/resources/images"
-                        filePath = Paths.get(path, "${resource.name}.${resource.contentType.substringAfter("/")}")
+                        filePath = Paths.get(path, resource.submittedFileName)
                         try {
                             val os = Files.newOutputStream(filePath)
                             os.write(resource.inputStream.readBytes())
@@ -114,9 +114,9 @@ sealed class AudioGramFileManager {
                             e.printStackTrace()
                         }
                     }
-                    "video" -> {
-                        val path = "$ROOT/tasks/task_$id/resources/video"
-                        filePath = Paths.get(path, "video.${resource.submittedFileName.substringAfterLast(".")}")
+                    "background" -> {
+                        val path = "$ROOT/tasks/task_$id/resources/background"
+                        filePath = Paths.get(path, resource.submittedFileName)
                         try {
                             val os = Files.newOutputStream(filePath)
                             os.write(resource.inputStream.readBytes())
