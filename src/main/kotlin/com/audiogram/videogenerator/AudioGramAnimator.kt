@@ -21,15 +21,15 @@ class AudioGramAnimator(val data: AudioGramData) {
                     var model = data.animations[layer.animationModel]!!
 
                     model.posX?.let {
-                        layer.posX = it.interpolate()
+                        layer.posX = it.interpolate(data.meta.video.optimisation!!)
                     }
 
                     model.posY?.let {
-                        layer.posY = it.interpolate()
+                        layer.posY = it.interpolate(data.meta.video.optimisation!!)
                     }
 
                     model.opacity?.let {
-                        layer.opacity = it.interpolate().toInt()
+                        layer.opacity = it.interpolate(data.meta.video.optimisation!!).toInt()
                     }
 
                 }
@@ -38,30 +38,31 @@ class AudioGramAnimator(val data: AudioGramData) {
                     var model = data.animations[layer.animationModel]!!
 
                     model.posX?.let {
-                        layer.posX = it.interpolate()
+                        layer.posX = it.interpolate(data.meta.video.optimisation!!)
                     }
 
                     model.posY?.let {
-                        layer.posY = it.interpolate()
+                        layer.posY = it.interpolate(data.meta.video.optimisation!!)
                     }
 
                     model.opacity?.let {
-                        layer.opacity = it.interpolate().toInt()
+                        layer.opacity = it.interpolate(data.meta.video.optimisation!!).toInt()
                     }
                 }
                 is AudiogramText -> {
+
                     var model = data.animations[layer.animationModel]!!
 
                     model.posX?.let {
-                        layer.posX = it.interpolate()
+                        layer.posX = it.interpolate(data.meta.video.optimisation!!)
                     }
 
                     model.posY?.let {
-                        layer.posY = it.interpolate()
+                        layer.posY = it.interpolate(data.meta.video.optimisation!!)
                     }
 
                     model.opacity?.let {
-                        layer.opacity = it.interpolate().toInt()
+                        layer.opacity = it.interpolate(data.meta.video.optimisation!!).toInt()
                     }
                 }
 

@@ -100,6 +100,7 @@ class Video {
     var width: Double? = null
     var height: Double? = null
     var quality: Int? = null
+    var optimisation: Boolean? = false
 }
 
 class AudiogramWaveform {
@@ -141,12 +142,13 @@ class AnimationParameter {
     private var absoluteProgress = 0.0
     private var range = 0.0
     private var foward = true
+    private var fps = 30.0
     private var initiated = false
 
-    private fun init() {
-
-        frameDelay = (delay!! * 30) / 1000
-        frameRange = ((duration!! * 30) / 1000)
+    private fun init(optimised: Boolean) {
+        if (optimised) fps = 24.0
+        frameDelay = (delay!! * fps) / 1000
+        frameRange = ((duration!! * fps) / 1000)
         range = end!! - start!!
     }
 
@@ -158,8 +160,8 @@ class AnimationParameter {
         return 1 - (1 - x).pow(3)
     }
 
-    fun interpolate(): Double {
-        if (!initiated) init().also { initiated = true }
+    fun interpolate(optimised: Boolean): Double {
+        if (!initiated) init(optimised).also { initiated = true }
         if (frameCount >= frameDelay) absoluteProgress = (frameCount - frameDelay) / frameRange
         if (frameCount >= (frameRange + frameDelay).roundToInt()) absoluteProgress = 1.0
 

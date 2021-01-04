@@ -33,6 +33,9 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
 
         loadOpenCvLibraries()
 
+        var fps = 30.0
+        if (data.meta.video.optimisation!!) fps = 24.0
+
         val startTime = System.currentTimeMillis()
         val points = freqAmpData.size
         var index = 1
@@ -40,8 +43,8 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
         var currentPoint = 0
 
         val staticImage = createStaticImage(data)
-        val bufferedImage = BufferedImage(data.meta.video.width!!.toInt(), data.meta.video.height!!.toInt(), BufferedImage.TYPE_3BYTE_BGR)
-        val g2d = bufferedImage.createGraphics().also { applyQualityRenderingHints(it) }
+        var alphaBuffer = BufferedImage(data.meta.video.width!!.toInt(), data.meta.video.height!!.toInt(), BufferedImage.TYPE_3BYTE_BGR)
+        val g2d = alphaBuffer.createGraphics().also { applyQualityRenderingHints(it) }
 
         var audioGramFrameGrabber: AudioGramFrameGrabber? = null
         var audioGramAnimator: AudioGramAnimator? = null
@@ -49,7 +52,7 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
         val plotters = AudioGramPlotter().getPlotters(data)
         val effectsManager = EffectsManager(data)
 
-        if (data.isBackgroundInitialized) audioGramFrameGrabber = AudioGramFrameGrabber(data, 30)
+        if (data.isBackgroundInitialized) audioGramFrameGrabber = AudioGramFrameGrabber(data, fps.toInt())
         if (data.animatedLayers.isNotEmpty()) audioGramAnimator = AudioGramAnimator(data)
 
         while (AudioGramTaskManager.taskIsRunning(data.id)) {
@@ -86,8 +89,12 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
                 currentPoint++
                 index++
 
-                writer.encodeVideo(0, bufferedImage, (33333333.3 * index).roundToLong(), TimeUnit.NANOSECONDS)
-                bufferedImage.flush()
+                if (data.meta.video.optimisation!!) {
+                    writer.encodeVideo(0, fastResizeImage(alphaBuffer, 0.5), ((1000000000.0 / fps) * index).roundToLong(), TimeUnit.NANOSECONDS)
+                } else {
+                    writer.encodeVideo(0, alphaBuffer, ((1000000000.0 / fps) * index).roundToLong(), TimeUnit.NANOSECONDS)
+                }
+                alphaBuffer.flush()
 
 
             } else break
@@ -590,10 +597,30 @@ class AudioGramRenderer(private val freqAmpData: ArrayList<FloatArray>, private 
             return HighGui.toBufferedImage(resizeImage) as BufferedImage
         }
 
+        fun fastResizeImage(sourceIn: BufferedImage, scale: Double): BufferedImage {
+            val source = convertToType(sourceIn, BufferedImage.TYPE_3BYTE_BGR)
+            val scaledWidth: Double
+            val scaledHeight: Double
+
+
+            scaledWidth = source.width * scale
+            scaledHeight = source.height * scale
+
+            val pixels = (source.raster.dataBuffer as DataBufferByte).data
+            val matImg = Mat(source.height, source.width, CvType.CV_8UC3)
+            matImg.put(0, 0, pixels)
+
+            val resizeImage = Mat()
+            val sz = Size(scaledWidth, scaledHeight)
+
+            Imgproc.resize(matImg, resizeImage, sz)
+            return HighGui.toBufferedImage(resizeImage) as BufferedImage
+        }
+
         private fun convertToType(sourceImage: BufferedImage, targetType: Int): BufferedImage {
 
             val image: BufferedImage
-            if (sourceImage.type == targetType) image = sourceImage
+            if (sourceImage.type == targetType) return sourceImage
             else {
                 image = BufferedImage(sourceImage.width,
                         sourceImage.height, targetType)

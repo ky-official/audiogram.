@@ -16,8 +16,8 @@ import kotlin.math.roundToInt
 class AudioGramVideoTask(private var data: AudioGramData) {
 
 
-    private val frameWidth = data.meta.video.width!!.toInt()
-    private val frameHeight = data.meta.video.height!!.toInt()
+    private var frameWidth = data.meta.video.width!!.toInt()
+    private var frameHeight = data.meta.video.height!!.toInt()
     private var audioUrl: String = data.audioUrl
     private var videoUrl: String = AudioGramFileManager.createVideoContainer(data.id)
     private var writer = MediaWriterMod(videoUrl)
@@ -31,10 +31,18 @@ class AudioGramVideoTask(private var data: AudioGramData) {
     private var freqAmpData: ArrayList<FloatArray> = ArrayList()
     private var sigAmpData: ArrayList<FloatArray> = ArrayList()
     private var smooth = FloatArray(6) { _ -> 1f }
+    var fps = 30.0
 
 
     init {
         try {
+
+
+            if (data.meta.video.optimisation!!) {
+                fps = 24.0
+                frameHeight = (frameHeight * 0.5).toInt()
+                frameWidth = (frameWidth * 0.5).toInt()
+            }
 
 
             val quality = data.meta.video.quality
@@ -45,7 +53,7 @@ class AudioGramVideoTask(private var data: AudioGramData) {
                     0,
                     0,
                     ICodec.ID.CODEC_ID_H264,
-                    IRational.make(30.0),
+                    IRational.make(fps),
                     bitrate,
                     frameWidth,
                     frameHeight
@@ -66,6 +74,7 @@ class AudioGramVideoTask(private var data: AudioGramData) {
             AudioGramRenderer(freqAmpData, sigAmpData, data, writer).start()
         } catch (e: Exception) {
             println(e.message)
+            e.printStackTrace()
             //update front end
         }
     }
@@ -151,8 +160,8 @@ class AudioGramVideoTask(private var data: AudioGramData) {
                 }
             }
         }
-        freqAmpData = arraySampler(freqAmpData, (30 * data.trackLength!!).roundToInt())
-        sigAmpData = arraySampler(sigAmpData, (30 * data.trackLength!!).roundToInt())
+        freqAmpData = arraySampler(freqAmpData, (fps * data.trackLength!!).roundToInt())
+        sigAmpData = arraySampler(sigAmpData, (fps * data.trackLength!!).roundToInt())
     }
 
     private inline fun <reified T> arraySampler(array: ArrayList<T>, sampleSize: Int): ArrayList<T> {
@@ -165,7 +174,7 @@ class AudioGramVideoTask(private var data: AudioGramData) {
         val interval = totalItems.toDouble() / sampleSize
 
         for (i in 0 until sampleSize) {
-            val evenIndex = Math.floor(i * interval + interval / 2).toInt()
+            val evenIndex = floor(i * interval + interval / 2).toInt()
             result.add(array[evenIndex])
         }
         return result
